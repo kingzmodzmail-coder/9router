@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo, Fragment } from "react";
+import { useState, useEffect, useCallback, useMemo, Fragment, memo } from "react";
 import PropTypes from "prop-types";
 import Card from "@/shared/components/Card";
 import Badge from "@/shared/components/Badge";
@@ -72,6 +72,62 @@ ValueCells.propTypes = {
   item: PropTypes.object.isRequired,
   viewMode: PropTypes.string.isRequired,
   isSummary: PropTypes.bool,
+};
+
+const GroupRow = memo(function GroupRow({
+  group,
+  isExpanded,
+  toggleGroup,
+  renderSummaryCells,
+  renderDetailCells,
+  viewMode,
+}) {
+  return (
+    <Fragment>
+      {/* Group summary row */}
+      <tr
+        className="group-summary cursor-pointer hover:bg-bg-subtle/50 transition-colors"
+        onClick={() => toggleGroup(group.groupKey)}
+      >
+        <td className="px-6 py-3">
+          <div className="flex items-center gap-2">
+            <span
+              className={`material-symbols-outlined text-[18px] text-text-muted transition-transform ${isExpanded ? "rotate-90" : ""}`}
+            >
+              chevron_right
+            </span>
+            <span
+              className={`font-medium transition-colors ${group.summary.pending > 0 ? "text-primary" : ""}`}
+            >
+              {group.groupKey}
+            </span>
+          </div>
+        </td>
+        {renderSummaryCells(group)}
+        <ValueCells item={group.summary} viewMode={viewMode} isSummary />
+      </tr>
+      {/* Detail rows */}
+      {isExpanded &&
+        group.items.map((item) => (
+          <tr
+            key={`detail-${item.key}`}
+            className="group-detail hover:bg-bg-subtle/20 transition-colors"
+          >
+            {renderDetailCells(item)}
+            <ValueCells item={item} viewMode={viewMode} />
+          </tr>
+        ))}
+    </Fragment>
+  );
+});
+
+GroupRow.propTypes = {
+  group: PropTypes.object.isRequired,
+  isExpanded: PropTypes.bool.isRequired,
+  toggleGroup: PropTypes.func.isRequired,
+  renderSummaryCells: PropTypes.func.isRequired,
+  renderDetailCells: PropTypes.func.isRequired,
+  viewMode: PropTypes.string.isRequired,
 };
 
 /**
@@ -187,36 +243,15 @@ export default function UsageTable({
           </thead>
           <tbody className="divide-y divide-border">
             {groupedData.map((group) => (
-              <Fragment key={group.groupKey}>
-                {/* Group summary row */}
-                <tr
-                  className="group-summary cursor-pointer hover:bg-bg-subtle/50 transition-colors"
-                  onClick={() => toggleGroup(group.groupKey)}
-                >
-                  <td className="px-6 py-3">
-                    <div className="flex items-center gap-2">
-                      <span className={`material-symbols-outlined text-[18px] text-text-muted transition-transform ${expanded.has(group.groupKey) ? "rotate-90" : ""}`}>
-                        chevron_right
-                      </span>
-                      <span className={`font-medium transition-colors ${group.summary.pending > 0 ? "text-primary" : ""}`}>
-                        {group.groupKey}
-                      </span>
-                    </div>
-                  </td>
-                  {renderSummaryCells(group)}
-                  <ValueCells item={group.summary} viewMode={viewMode} isSummary />
-                </tr>
-                {/* Detail rows */}
-                {expanded.has(group.groupKey) && group.items.map((item) => (
-                  <tr
-                    key={`detail-${item.key}`}
-                    className="group-detail hover:bg-bg-subtle/20 transition-colors"
-                  >
-                    {renderDetailCells(item)}
-                    <ValueCells item={item} viewMode={viewMode} />
-                  </tr>
-                ))}
-              </Fragment>
+              <GroupRow
+                key={group.groupKey}
+                group={group}
+                isExpanded={expanded.has(group.groupKey)}
+                toggleGroup={toggleGroup}
+                renderSummaryCells={renderSummaryCells}
+                renderDetailCells={renderDetailCells}
+                viewMode={viewMode}
+              />
             ))}
             {groupedData.length === 0 && (
               <tr>
