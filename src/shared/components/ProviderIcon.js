@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, memo } from "react";
 import PropTypes from "prop-types";
 import { getProviderIconSrc, markProviderIconMissing } from "@/shared/utils/providerIcon";
 
@@ -12,7 +12,10 @@ function resolveSrc(src, providerId) {
   return src;
 }
 
-export default function ProviderIcon({
+// ⚡ Bolt: Wrapped ProviderIcon in React.memo to prevent unnecessary re-renders.
+// 🎯 Why: This component is used extensively in data tables, lists, and charts (like ProviderTopology).
+// 📊 Impact: Significantly reduces render cycles when parent components (like animated charts) re-render frequently while these props remain stable.
+const ProviderIcon = memo(function ProviderIcon({
   src,
   providerId,
   alt,
@@ -57,7 +60,9 @@ export default function ProviderIcon({
       }}
     />
   );
-}
+});
+
+export default ProviderIcon;
 
 ProviderIcon.propTypes = {
   src: PropTypes.string,
