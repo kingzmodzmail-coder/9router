@@ -1,0 +1,3 @@
+## 2024-05-24 - Dynamic Timeouts for Relative Timestamps
+**Learning:** Using a fast, fixed interval (like `setInterval(() => ..., 1000)`) in list items to update relative timestamps (e.g., "5m ago", "2h ago") causes unnecessary React re-renders and wastes CPU cycles in the background when the displayed string doesn't actually change every second.
+**Action:** Use dynamic `setTimeout`s that calculate the time remaining until the next expected string change (e.g., minute boundary, hour boundary) to schedule the next update. This prevents constant background ticking for items that only need updates every minute or hour.
