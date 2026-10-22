@@ -1,0 +1,3 @@
+## 2025-02-14 - ProviderIcon React.memo Optimization
+**Learning:** Widely used presentational components that receive primitive props (like `ProviderIcon` which renders simple images or fallbacks based on strings/numbers) are excellent candidates for `React.memo`. When these are nested inside components with frequent state changes (like animated topology charts or data tables), missing memoization can cause thousands of unnecessary re-renders.
+**Action:** Always check frequently reused atomic components (like icons, badges, simple buttons) for `React.memo` applicability, especially when they appear in large lists or frequently updated parent components.
