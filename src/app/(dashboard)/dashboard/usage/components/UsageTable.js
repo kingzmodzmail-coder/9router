@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo, Fragment } from "react";
+import { useState, useEffect, useCallback, useMemo, Fragment, memo } from "react";
 import PropTypes from "prop-types";
 import Card from "@/shared/components/Card";
 import Badge from "@/shared/components/Badge";
@@ -17,10 +17,10 @@ function fmtTime(iso) {
   return new Date(iso).toLocaleDateString();
 }
 
-function SortIcon({ field, currentSort, currentOrder }) {
+const SortIcon = memo(function SortIcon({ field, currentSort, currentOrder }) {
   if (currentSort !== field) return <span className="ml-1 opacity-20">↕</span>;
   return <span className="ml-1">{currentOrder === "asc" ? "↑" : "↓"}</span>;
-}
+});
 
 SortIcon.propTypes = {
   field: PropTypes.string.isRequired,
@@ -31,7 +31,7 @@ SortIcon.propTypes = {
 /**
  * Render 3 token or cost cells based on viewMode
  */
-function ValueCells({ item, viewMode, isSummary = false }) {
+const ValueCells = memo(function ValueCells({ item, viewMode, isSummary = false }) {
   if (viewMode === "tokens") {
     return (
       <>
@@ -66,7 +66,7 @@ function ValueCells({ item, viewMode, isSummary = false }) {
       </td>
     </>
   );
-}
+});
 
 ValueCells.propTypes = {
   item: PropTypes.object.isRequired,
