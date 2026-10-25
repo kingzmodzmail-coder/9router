@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo } from "react";
 import PropTypes from "prop-types";
 import { getProviderIconSrc, markProviderIconMissing } from "@/shared/utils/providerIcon";
 
@@ -12,7 +12,9 @@ function resolveSrc(src, providerId) {
   return src;
 }
 
-export default function ProviderIcon({
+// ⚡ Bolt Optimization: Memoized to prevent unnecessary re-renders in tables and lists
+// This component only takes primitive props and is rendered frequently throughout the app
+const ProviderIcon = memo(function ProviderIcon({
   src,
   providerId,
   alt,
@@ -57,7 +59,9 @@ export default function ProviderIcon({
       }}
     />
   );
-}
+});
+
+export default ProviderIcon;
 
 ProviderIcon.propTypes = {
   src: PropTypes.string,
