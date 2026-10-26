@@ -29,14 +29,46 @@ function timeAgo(timestamp) {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
-// Auto-update time display every second without re-rendering parent
+// Auto-update time display efficiently without excessive re-renders
 function TimeAgo({ timestamp }) {
   const [, setTick] = useState(0);
   
   useEffect(() => {
-    const timer = setInterval(() => setTick(t => t + 1), 1000);
-    return () => clearInterval(timer);
-  }, []);
+    if (!timestamp) return;
+
+    let timer;
+    const scheduleNext = () => {
+      const diffMs = Date.now() - new Date(timestamp).getTime();
+      const diffSecs = Math.floor(diffMs / 1000);
+
+      let nextTickMs;
+      if (diffSecs < 60) {
+        // Less than a minute: update every second
+        nextTickMs = 1000 - (diffMs % 1000);
+      } else if (diffSecs < 3600) {
+        // Less than an hour: update every minute
+        nextTickMs = 60000 - (diffMs % 60000);
+      } else if (diffSecs < 86400) {
+        // Less than a day: update every hour
+        nextTickMs = 3600000 - (diffMs % 3600000);
+      } else {
+        // More than a day: update daily
+        nextTickMs = 86400000 - (diffMs % 86400000);
+      }
+
+      // Ensure positive timeout
+      if (nextTickMs <= 0) nextTickMs = 1000;
+
+      // Add a small buffer (50ms) to ensure time crosses the threshold when re-rendering
+      timer = setTimeout(() => {
+        setTick(t => t + 1);
+        scheduleNext();
+      }, nextTickMs + 50);
+    };
+
+    scheduleNext();
+    return () => clearTimeout(timer);
+  }, [timestamp]);
   
   return <>{timeAgo(timestamp)}</>;
 }
